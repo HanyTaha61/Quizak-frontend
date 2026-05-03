@@ -22,7 +22,7 @@
       <v-row v-else>
         <v-col
           v-for="quiz in quizzes"
-          :key="quiz.id"
+          :key="quiz.slug"
           cols="12"
           sm="6"
           md="4"
@@ -57,10 +57,6 @@
                 <v-btn color="primary" variant="text">
                   ابدأ
                 </v-btn>
-
-                <span class="plays">
-                  👁 {{ quiz.plays.toLocaleString() }}
-                </span>
               </v-card-actions>
 
             </v-card>
@@ -78,14 +74,18 @@ import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
 const router = useRouter()
+const quiz = ref(null)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
 
 /* ---------------- API FETCH ---------------- */
-const { data, pending } = await useFetch('/api/quizzes', {
+const { data, pending } = await useFetch(`${API_BASE_URL}/api/quizzes`, {
   default: () => ({
     quizzes: [],
     stats: { users: 0 }
   })
 })
+
+quiz.value = data.value?.quizzes?.length ? data.value.quizzes[0] : null
 
 /* fallback لو API مش جاهز */
 const fallback = {
@@ -119,12 +119,11 @@ const fallback = {
 }
 
 /* merge API مع fallback */
-const quizzes = ref(data.value?.quizzes?.length ? data.value.quizzes : fallback.quizzes)
-const stats = ref(data.value?.stats?.users ? data.value.stats : fallback.stats)
+const quizzes = ref(data.value?.quizzes?.length? data.value.quizzes: fallback.quizzes)
 
 /* ---------------- ACTIONS ---------------- */
 const goToQuiz = (quiz) => {
-  router.push(`/quiz/${quiz.id}`)
+  router.push(`/quiz/${quiz.slug}`)
 }
 
 const scrollToQuizzes = () => {

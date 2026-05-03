@@ -6,7 +6,11 @@
 
 <script setup>
 import Questions from '@/components/questions.vue'
+import { useRoute } from 'vue-router'
+
 const quiz = ref(null)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
+const route = useRoute()
 
 useHead(() => ({
   title: quiz.value?.title || 'Quizak',
@@ -27,11 +31,10 @@ useHead(() => ({
   ]
 }))
 
-const route = useRoute()
 
 onMounted(async () => {
-  quiz.value = await $fetch(`http://localhost:6500/api/quizzes/${route.params.id}`)
+  quiz.value = await $fetch(`${API_BASE_URL}/api/quizzes/${route.params.slug}`)
 })
 
-console.log('Quiz ID:', route.params.id)
+console.log('Quiz slug:', route.params.slug)
 </script>

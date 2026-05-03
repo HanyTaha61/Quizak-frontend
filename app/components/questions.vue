@@ -106,11 +106,7 @@
         <!-- Result -->
         <div v-else class="text-center mt-6">
 
-        <v-img
-          :src="getAnimalImage(result.key)"
-          height="140"
-          class="result-image mb-4"
-        />
+        <v-img :src="getAnimalImage(result.key)" height="140" class="result-image mb-4" />
 
           <h2 class="text-h5"> {{ username }}، شخصيتك تشبه {{ translatedAnimal }} </h2>
 
@@ -135,10 +131,10 @@ import confetti from 'canvas-confetti'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
 const quiz = ref(null) // لو هتجيبها من API لاحقاً
 
-const currentQuizId = computed(() => route.params.id)
+const currentQuizId = computed(() => route.params.slug)
 
 const calculatedScore = computed(() => {
   // simple scoring engine (MVP logic)
@@ -284,7 +280,7 @@ const goNext = async () => {
     current.value++
   } else {
 
-    const res = await $fetch('http://localhost:6500/api/results/submit', {
+    const res = await $fetch(`${API_BASE_URL}/api/results/submit`, {
       method: 'POST',
       body: {
     quizId: currentQuizId.value,
@@ -292,7 +288,7 @@ const goNext = async () => {
     timeSpent: 0
   }
 })
-result.value = res.data || res
+result.value = res.data
 triggerCelebration()
 
 console.log("API RESPONSE:", res)
@@ -333,7 +329,7 @@ ${link}`
 }
 
 const shareOnFacebook = () => {
-  const link = `https://www.quizak.com/quiz/${route.params.id}`
+  const link = `https://www.quizak.com/quiz/${route.params.slug}`
 
   const text = `🔥 أنا شخصيتي تشبه ${translatedAnimal.value} 😎`
 
