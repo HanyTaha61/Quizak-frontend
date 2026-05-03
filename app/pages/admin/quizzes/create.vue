@@ -1,52 +1,54 @@
 <template>
-  <v-container class="max-width-900 py-10">
+  <!-- إضافة dir="rtl" لضمان تنسيق الواجهة من اليمين لليسار -->
+  <v-container class="max-width-900 py-10" dir="rtl">
     
-    <!-- 🚀 HEADER SECTION -->
+    <!-- 🚀 قسم العنوان الرئيسي -->
     <div class="d-flex align-center justify-space-between mb-8">
+        <v-btn
+          color="primary"
+          size="x-large"
+          rounded="xl"
+          elevation="4"
+          prepend-icon="mdi-rocket-launch"
+          :disabled="!isQuizValid"
+          @click="submitQuiz"
+        >
+          نشر الاختبار
+        </v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">Quiz Architect</h1>
-        <p class="text-subtitle-1 text-medium-emphasis">Design your logic-based personality quiz</p>
+        <h1 class="text-h4 font-weight-bold mb-1">مصمم الاختبارات</h1>
+        <p class="text-subtitle-1 text-medium-emphasis">قم بتصميم اختبار شخصية يعتمد على المنطق</p>
       </div>
-      <v-btn
-        color="primary"
-        size="x-large"
-        rounded="xl"
-        elevation="4"
-        prepend-icon="mdi-rocket-launch"
-        @click="submitQuiz"
-      >
-        Publish Quiz
-      </v-btn>
     </div>
 
-    <!-- 🔹 BASIC INFO -->
+    <!-- 🔹 المعلومات الأساسية -->
     <v-card variant="outlined" class="rounded-lg border-opacity-100 mb-8 pa-6 bg-surface">
       <div class="d-flex align-center mb-4">
-        <v-icon color="primary" class="mr-2">mdi-information-outline</v-icon>
-        <h3 class="text-h6 font-weight-bold">Identity</h3>
+        <v-icon color="primary" class="ml-2">mdi-information-outline</v-icon>
+        <h3 class="text-h6 font-weight-bold">هوية الاختبار</h3>
       </div>
 
       <v-row>
         <v-col cols="12" md="6">
           <v-text-field 
             v-model="quiz.title" 
-            label="Quiz Title" 
+            label="عنوان الاختبار" 
             variant="filled" 
-            placeholder="e.g. Which Star Wars character are you?" 
+            placeholder="مثال: أي شخصية من حرب النجوم أنت؟" 
           />
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field 
             v-model="quiz.description" 
-            label="Quiz Description" 
+            label="وصف الاختبار" 
             variant="filled" 
-            placeholder="briefly describe your quiz" 
+            placeholder="اكتب وصفاً مختصراً لاختبارك" 
           />
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field 
             v-model="quiz.slug" 
-            label="URL Slug" 
+            label="رابط الاختبار (Slug)" 
             variant="filled" 
             prefix="quizapp.com/" 
           />
@@ -54,7 +56,7 @@
         <v-col cols="12">
           <v-text-field 
             v-model="quiz.image" 
-            label="Cover Image URL" 
+            label="رابط صورة الغلاف" 
             variant="filled" 
             prepend-inner-icon="mdi-image-outline"
           />
@@ -62,14 +64,14 @@
       </v-row>
     </v-card>
 
-    <!-- 🔹 RESULTS BUILDER -->
+    <!-- 🔹 بناء النتائج -->
     <section class="mb-10">
       <div class="d-flex align-center justify-space-between mb-4">
         <div class="d-flex align-center">
-          <v-icon color="success" class="mr-2">mdi-trophy-outline</v-icon>
-          <h3 class="text-h6 font-weight-bold">Outcomes & Results</h3>
+          <v-icon color="success" class="ml-2">mdi-trophy-outline</v-icon>
+          <h3 class="text-h6 font-weight-bold">النتائج والمخرجات</h3>
         </div>
-        <v-btn variant="text" color="primary" prepend-icon="mdi-plus" @click="addResult">Add Outcome</v-btn>
+        <v-btn variant="text" color="primary" prepend-icon="mdi-plus" @click="addResult">إضافة نتيجة</v-btn>
       </div>
 
       <v-row>
@@ -80,101 +82,119 @@
               variant="text" 
               color="error" 
               size="small" 
-              class="position-absolute top-0 right-0 mt-2 mr-2"
+              class="position-absolute top-0 left-0 mt-2 ml-2"
               @click="quiz.results.splice(ri, 1)"
             />
-            <v-text-field v-model="r.key" label="Result ID (e.g. lion)" variant="underlined" density="compact" />
-            <v-text-field v-model="r.title" label="Display Title" variant="underlined" density="compact" />
-            <v-textarea v-model="r.description" label="Result Description" variant="underlined" rows="2" />
+            <v-text-field v-model="r.key" label="معرف النتيجة (مثلاً: lion)" variant="underlined" density="compact" />
+            <v-text-field v-model="r.title" label="العنوان الظاهر للمستخدم" variant="underlined" density="compact" />
+            <v-textarea v-model="r.description" label="وصف النتيجة" variant="underlined" rows="2" />
+            <!-- حقل الصورة المذكور في تعليقك -->
+            <v-text-field v-model="r.image" label="رابط صورة النتيجة" variant="underlined" density="compact" prepend-inner-icon="mdi-camera" />
           </v-card>
         </v-col>
       </v-row>
       
       <v-empty-state
         v-if="!quiz.results.length"
-        text="Define what users can get as a result first."
+        text="قم بتعريف النتائج التي يمكن أن يحصل عليها المستخدم أولاً."
         icon="mdi-flask-empty-outline"
+        label="لا توجد نتائج بعد"
       />
     </section>
 
-    <!-- 🔹 QUESTIONS BUILDER -->
-    <section class="mb-10">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <div class="d-flex align-center">
-          <v-icon color="secondary" class="mr-2">mdi-comment-question-outline</v-icon>
-          <h3 class="text-h6 font-weight-bold">Questions</h3>
+    <!-- 🔹 بناء الأسئلة -->
+<!-- 🔹 بناء الأسئلة -->
+<section class="mb-10">
+  <div class="d-flex align-center justify-space-between mb-4">
+    <div class="d-flex align-center">
+      <v-icon color="secondary" class="ml-2">mdi-comment-question-outline</v-icon>
+      <h3 class="text-h6 font-weight-bold">الأسئلة</h3>
+    </div>
+    <v-btn color="secondary" rounded="pill" prepend-icon="mdi-plus" @click="addQuestion">سؤال جديد</v-btn>
+  </div>
+
+  <v-hover v-for="(q, qi) in quiz.questions" :key="qi" v-slot="{ isHovering, props }">
+    <v-card
+      v-bind="props"
+      class="mb-6 rounded-xl transition-swing"
+      :elevation="isHovering ? 8 : 1"
+      variant="flat"
+      border
+    >
+      <!-- رأس البطاقة: يحتوي على رقم السؤال وزر الحذف -->
+      <div class="bg-secondary-lighten-5 pa-4 d-flex align-center justify-space-between">
+        <div class="d-flex align-center flex-grow-1">
+          <v-chip size="small" color="secondary" class="ml-3">س{{ qi + 1 }}</v-chip>
+          <v-text-field 
+            v-model="q.text" 
+            placeholder="اكتب سؤالك هنا..." 
+            hide-details 
+            variant="plain"
+            class="text-h6 font-weight-medium"
+          />
         </div>
-        <v-btn color="secondary" rounded="pill" prepend-icon="mdi-plus" @click="addQuestion">New Question</v-btn>
+        
+        <!-- زر حذف السؤال بالكامل -->
+        <v-btn 
+          icon="mdi-delete-forever" 
+          variant="text" 
+          color="error" 
+          @click="removeQuestion(qi)"
+          title="حذف السؤال"
+        />
       </div>
 
-      <v-hover v-for="(q, qi) in quiz.questions" :key="qi" v-slot="{ isHovering, props }">
-        <v-card
-          v-bind="props"
-          class="mb-6 rounded-xl transition-swing"
-          :elevation="isHovering ? 8 : 1"
-          variant="flat"
-          border
+      <v-divider />
+
+      <!-- قسم الخيارات (كما هو) -->
+      <div class="pa-6">
+        <div v-for="(opt, oi) in q.options" :key="oi" class="d-flex align-center gap-3 mb-3">
+          <v-text-field 
+            v-model="opt.text" 
+            label="نص الخيار" 
+            variant="outlined" 
+            density="comfortable" 
+            hide-details 
+          />
+          <v-select
+            :items="resultKeys"
+            v-model="opt.value"
+            label="يؤدي إلى النتيجة..."
+            variant="outlined"
+            density="comfortable"
+            hide-details
+            style="max-width: 200px"
+          />
+          <v-btn 
+            icon="mdi-delete-outline" 
+            variant="text" 
+            color="grey" 
+            @click="q.options.splice(oi, 1)" 
+          />
+        </div>
+        
+        <v-btn 
+          variant="tonal" 
+          size="small" 
+          prepend-icon="mdi-plus" 
+          class="mt-2"
+          @click="addOption(qi)"
         >
-          <div class="bg-secondary-lighten-5 pa-4 d-flex align-center">
-            <v-chip size="small" color="secondary" class="mr-3">Q{{ qi + 1 }}</v-chip>
-            <v-text-field 
-              v-model="q.text" 
-              placeholder="Type your question here..." 
-              hide-details 
-              variant="plain"
-              class="text-h6 font-weight-medium"
-            />
-          </div>
-
-          <v-divider />
-
-          <div class="pa-6">
-            <div v-for="(opt, oi) in q.options" :key="oi" class="d-flex align-center gap-3 mb-3">
-              <v-text-field 
-                v-model="opt.text" 
-                label="Option text" 
-                variant="outlined" 
-                density="comfortable" 
-                hide-details 
-              />
-              <v-select
-                :items="resultKeys"
-                v-model="opt.value"
-                label="Points to..."
-                variant="outlined"
-                density="comfortable"
-                hide-details
-                style="max-width: 200px"
-                :rules="[v => !!v || 'Result mapping is required']"
-              />
-              <v-btn 
-                icon="mdi-delete-outline" 
-                variant="text" 
-                color="grey" 
-                @click="q.options.splice(oi, 1)" 
-              />
-            </div>
-            
-            <v-btn 
-              variant="tonal" 
-              size="small" 
-              prepend-icon="mdi-plus" 
-              class="mt-2"
-              @click="addOption(qi)"
-            >
-              Add Choice
-            </v-btn>
-          </div>
-        </v-card>
-      </v-hover>
-    </section>
+          إضافة خيار
+        </v-btn>
+      </div>
+    </v-card>
+  </v-hover>
+</section>
 
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const quiz = ref({
   title: '',
   description: '',
@@ -188,12 +208,12 @@ definePageMeta({
   ssr: false
 })
 
-/* 🔥 dynamic result keys (important UX improvement) */
+/* 🔥 مفاتيح النتائج الديناميكية */
 const resultKeys = computed(() =>
   quiz.value.results.map(r => r.key)
 )
 
-/* ---------------- BUILDERS ---------------- */
+/* ---------------- المكونات ---------------- */
 const addQuestion = () => {
   quiz.value.questions.push({
     text: '',
@@ -202,6 +222,13 @@ const addQuestion = () => {
       { text: '', value: '' }
     ]
   })
+}
+
+// delete question
+const removeQuestion = (index) => {
+  if (confirm('هل أنت متأكد من حذف هذا السؤال نهائياً؟')) {
+    quiz.value.questions.splice(index, 1)
+  }
 }
 
 const addOption = (index) => {
@@ -220,7 +247,7 @@ const addResult = () => {
   })
 }
 
-/* ---------------- SUBMIT ---------------- */
+/* ---------------- الإرسال ---------------- */
 const submitQuiz = async () => {
   try {
     await $fetch('http://localhost:6500/api/quizzes', {
@@ -228,14 +255,15 @@ const submitQuiz = async () => {
       body: quiz.value
     })
 
-    alert('✅ Quiz Created')
-
+    alert('✅ تم إنشاء الاختبار بنجاح')
+    router.push("/")
   } catch (err) {
     console.error(err)
+    alert('❌ حدث خطأ أثناء الحفظ')
   }
 }
 
-// validation check before quiz is published (used to disable publish button if quiz is incomplete/invalid) 
+// التحقق من صحة البيانات قبل النشر
 const isQuizValid = computed(() => {
   if (!quiz.value.title || !quiz.value.slug) return false
   if (!quiz.value.results.length) return false
@@ -262,5 +290,9 @@ const isQuizValid = computed(() => {
 }
 .transition-swing {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* تأكد من أن الأيقونات والمسافات تتماشى مع RTL */
+:deep(.v-field__prepend-inner) {
+  padding-inline-end: 8px;
 }
 </style>

@@ -34,7 +34,7 @@
         <!-- Header -->
         <div class="d-flex justify-space-between align-center mb-4">
           <h2 class="text-h6 font-weight-bold">
-            اكتشف الحيوان الذي يشبهك
+            {{title}}
           </h2>
 
           <span class="text-caption">
@@ -51,9 +51,9 @@
         />
 
         <!-- Questions -->
-        <div v-if="!result">
-          <h3 class="text-subtitle-1 mb-4">
-            {{ questions[current].text }}
+        <div v-if="questionsReady && !result">
+          <h3 class="text-subtitle-1 mb-4" >
+            {{ questions[current]?.text }}
           </h3>
 
           <v-row>
@@ -104,21 +104,29 @@
         </div>
 
         <!-- Result -->
-        <div v-else class="text-center mt-6">
+        <div v-if="result" class="text-center mt-6">
 
-        <v-img :src="getAnimalImage(result.key)" height="140" class="result-image mb-4" />
+          <h2 class="text-h5">
+            {{ userName }}، شخصيتك تشبه {{ result?.title }}
+          </h2>
 
-          <h2 class="text-h5"> {{ username }}، شخصيتك تشبه {{ translatedAnimal }} </h2>
+          <p class="mt-2">{{ result?.description }}</p>
 
-          <p class="mt-2">{{ result.description }}</p>
-         <v-btn color="green" class="mt-2" @click="shareResult"> واتساب </v-btn>
-        <v-btn color="blue-darken-3" class="mt-2" @click="shareOnFacebook"> فيسبوك </v-btn>
+          <v-img
+            :src="result?.image || getImage(result?.key)"
+            height="140"
+          />
+        <v-row class="d-flex  justify-space-between mt-4" dense>
+            <v-btn color="green" class="mt-2" @click="shareResult"> واتساب </v-btn>
+
+          <v-btn color="blue-darken-3" class="mt-2" @click="shareOnFacebook"> فيسبوك </v-btn>
+
           <v-btn variant="text" class="mt-2" @click="resetQuiz">
             إعادة الاختبار
           </v-btn>
 
+        </v-row>
         </div>
-
       </div>
     </v-card>
 
@@ -130,40 +138,19 @@ import { ref, computed, onMounted } from 'vue'
 import confetti from 'canvas-confetti'
 import { useRoute } from 'vue-router'
 
+const props = defineProps({
+  quiz: Object,
+  userName: String
+})
+
 const route = useRoute()
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
-const quiz = ref(null) // لو هتجيبها من API لاحقاً
-
 const currentQuizId = computed(() => route.params.slug)
-
-const calculatedScore = computed(() => {
-  // simple scoring engine (MVP logic)
-  const map = {}
-
-  answers.value.forEach((a) => {
-    if (!a) return
-    map[a] = (map[a] || 0) + 1
-  })
-
-  // أعلى اختيار متكرر
-  let max = 0
-  let result = null
-
-  Object.entries(map).forEach(([key, value]) => {
-    if (value > max) {
-      max = value
-      result = key
-    }
-  })
-
-  return max
-})
 
 /* ---------------- STATE ---------------- */
 const current = ref(0)
 const answers = ref([])
 const result = ref(null)
-const username = ref('أحمد')
 
 /* Countdown */
 const countdown = ref(5)
@@ -171,72 +158,74 @@ const total = 5
 const isCounting = ref(true)
 
 /* ---------------- QUESTIONS ---------------- */
-const questions = [
-  {
-    text: 'كيف تقضي وقت فراغك؟',
-    options: [
-      { text: 'المغامرة', value: 'lion' },
-      { text: 'الأصدقاء', value: 'dolphin' },
-      { text: 'القراءة', value: 'owl' },
-      { text: 'الوحدة', value: 'wolf' }
-    ]
-  },
-  {
-    text: 'كيف يصفك الآخرون؟',
-    options: [
-      { text: 'قائد', value: 'lion' },
-      { text: 'مرح', value: 'dolphin' },
-      { text: 'ذكي', value: 'owl' },
-      { text: 'غامض', value: 'wolf' }
-    ]
-  },
-  {
-    text: 'كيف يصفك الآخرون؟',
-    options: [
-      { text: 'قائد', value: 'lion' },
-      { text: 'مرح', value: 'dolphin' },
-      { text: 'ذكي', value: 'owl' },
-      { text: 'غامض', value: 'wolf' }
-    ]
-  },
-  {
-    text: 'كيف يصفك الآخرون؟',
-    options: [
-      { text: 'قائد', value: 'lion' },
-      { text: 'مرح', value: 'dolphin' },
-      { text: 'ذكي', value: 'owl' },
-      { text: 'غامض', value: 'wolf' }
-    ]
-  },
-  {
-    text: 'كيف يصفك الآخرون؟',
-    options: [
-      { text: 'قائد', value: 'lion' },
-      { text: 'مرح', value: 'dolphin' },
-      { text: 'ذكي', value: 'owl' },
-      { text: 'غامض', value: 'wolf' }
-    ]
-  }
-]
-
-const animalMap = {
-  lion: 'الأسد',
-  dolphin: 'الدلفين',
-  owl: 'البومة',
-  wolf: 'الذئب'
-}
-
-const translatedAnimal = computed(() => {
-  return animalMap[result.value?.key] || ''
+const questions = computed(() => {
+  const q = props.quiz?.data?.questions
+  return Array.isArray(q) ? q : []
 })
+
+const title = computed(() => props.quiz?.data.title || 'Quizak')
+// const questions = [
+//   {
+//     text: 'كيف تقضي وقت فراغك؟',
+//     options: [
+//       { text: 'المغامرة', value: 'lion' },
+//       { text: 'الأصدقاء', value: 'dolphin' },
+//       { text: 'القراءة', value: 'owl' },
+//       { text: 'الوحدة', value: 'wolf' }
+//     ]
+//   },
+//   {
+//     text: 'كيف يصفك الآخرون؟',
+//     options: [
+//       { text: 'قائد', value: 'lion' },
+//       { text: 'مرح', value: 'dolphin' },
+//       { text: 'ذكي', value: 'owl' },
+//       { text: 'غامض', value: 'wolf' }
+//     ]
+//   },
+//   {
+//     text: 'كيف يصفك الآخرون؟',
+//     options: [
+//       { text: 'قائد', value: 'lion' },
+//       { text: 'مرح', value: 'dolphin' },
+//       { text: 'ذكي', value: 'owl' },
+//       { text: 'غامض', value: 'wolf' }
+//     ]
+//   },
+//   {
+//     text: 'كيف يصفك الآخرون؟',
+//     options: [
+//       { text: 'قائد', value: 'lion' },
+//       { text: 'مرح', value: 'dolphin' },
+//       { text: 'ذكي', value: 'owl' },
+//       { text: 'غامض', value: 'wolf' }
+//     ]
+//   },
+//   {
+//     text: 'كيف يصفك الآخرون؟',
+//     options: [
+//       { text: 'قائد', value: 'lion' },
+//       { text: 'مرح', value: 'dolphin' },
+//       { text: 'ذكي', value: 'owl' },
+//       { text: 'غامض', value: 'wolf' }
+//     ]
+//   }
+// ]
+
+// check if questions are ready 
+const questionsReady = computed(() =>
+  Array.isArray(props.quiz?.data?.questions) &&
+  props.quiz.data.questions.length > 0
+)
+const resultTitle = computed(() => result.value?._doc.title ?? '')
 
 /* ---------------- PROGRESS LOGIC (FIXED) ---------------- */
 const progress = computed(() => {
   if (result.value) return 100
 
-  const p = ((current.value + 1) / questions.length) * 100
+  const total = questions.value.length || 1 // safety fallback
+  const p = ((current.value + 1) / total) * 100
 
-  // يمنع الوصول لـ 100% قبل النتيجة
   return Math.min(p, 95)
 })
 
@@ -267,6 +256,7 @@ const startCountdown = () => {
 }
 
 onMounted(() => {
+  
     startCountdown()
 })
 
@@ -276,27 +266,26 @@ const selectAnswer = (value) => {
 }
 
 const goNext = async () => {
-  if (current.value < questions.length - 1) {
-    current.value++
-  } else {
+  const total = questions.value.length
 
-    const res = await $fetch(`${API_BASE_URL}/api/results/submit`, {
-      method: 'POST',
-      body: {
-    quizId: currentQuizId.value,
-    answers: answers.value,
-    timeSpent: 0
+  if (current.value < total - 1) {
+    current.value += 1
+    return
   }
-})
-result.value = res.data
-triggerCelebration()
 
-console.log("API RESPONSE:", res)
-console.log("RESULT VALUE:", result.value)
+  const res = await $fetch(`${API_BASE_URL}/api/results/submit`, {
+    method: 'POST',
+    body: {
+      quizId: currentQuizId.value,
+      answers: answers.value,
+      timeSpent: 0
+    }
+  })
 
-  }
+  result.value = res.data
+  
+  triggerCelebration()
 }
-
 
 const goBack = () => {
   if (current.value > 0) {
@@ -312,15 +301,15 @@ const resetQuiz = () => {
 }
 
 /* ---------------- HELPERS ---------------- */
-const getAnimalImage = (animal) => {
+const getImage = (animal) => {
   return `/images/${animal}.png`
 }
 
 const shareResult = () => {
   const link = 'https://www.quizak.com'
 
-  const text = `🔥أنا أشبه ${translatedAnimal.value} 😎
-شخصيتي تشبه ${translatedAnimal.value}!
+  const text = `🔥أنا أشبه ${result.value?.title} 😎
+شخصيتي تشبه ${result.value?.title}!
 
 جرب بنفسك 👇
 ${link}`
@@ -331,7 +320,7 @@ ${link}`
 const shareOnFacebook = () => {
   const link = `https://www.quizak.com/quiz/${route.params.slug}`
 
-  const text = `🔥 أنا شخصيتي تشبه ${translatedAnimal.value} 😎`
+  const text = `🔥 أنا شخصيتي تشبه ${result.value?.title} 😎`
 
   navigator.clipboard.writeText(`${text}\n${link}`)
 
@@ -480,6 +469,6 @@ const triggerCelebration = () => {
 
 .result-image {
   border-radius: 16px;
-  object-fit: contain; /* 🔥 أهم سطر */
+  object-fit: contain;
 }
 </style>

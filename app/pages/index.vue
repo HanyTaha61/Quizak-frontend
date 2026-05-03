@@ -1,9 +1,6 @@
 <template>
   <v-container fluid class="pa-0">
 
-    <!-- HERO -->
-  
-
     <!-- QUIZ GRID -->
     <v-container id="quizzes" class="mt-10">
 
@@ -76,6 +73,7 @@ import { ref } from 'vue'
 const router = useRouter()
 const quiz = ref(null)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
+const userName = ref('')
 
 /* ---------------- API FETCH ---------------- */
 const { data, pending } = await useFetch(`${API_BASE_URL}/api/quizzes`, {
@@ -119,7 +117,7 @@ const fallback = {
 }
 
 /* merge API مع fallback */
-const quizzes = ref(data.value?.quizzes?.length? data.value.quizzes: fallback.quizzes)
+const quizzes = ref(data.value.quizzes)
 
 /* ---------------- ACTIONS ---------------- */
 const goToQuiz = (quiz) => {
