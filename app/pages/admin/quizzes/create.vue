@@ -195,7 +195,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const API_BASE_URL = import.meta.env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500"
 const quiz = ref({
   title: '',
   description: '',
@@ -251,7 +251,7 @@ const addResult = () => {
 /* ---------------- الإرسال ---------------- */
 const submitQuiz = async () => {
   try {
-    await $fetch('http://localhost:6500/api/quizzes', {
+    await $fetch(`${API_BASE_URL}/api/quizzes`, {
       method: 'POST',
       body: quiz.value
     })

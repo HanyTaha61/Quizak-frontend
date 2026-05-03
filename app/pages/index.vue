@@ -9,14 +9,14 @@
       </h2>
 
       <!-- Skeleton -->
-      <v-row v-if="pending">
+      <!-- <v-row v-if="pending">
         <v-col v-for="i in 6" :key="i" cols="12" sm="6" md="4">
           <v-skeleton-loader type="card"></v-skeleton-loader>
         </v-col>
-      </v-row>
+      </v-row> -->
 
       <!-- Cards -->
-      <v-row v-else>
+      <v-row>
         <v-col
           v-for="quiz in quizzes"
           :key="quiz.slug"
@@ -73,51 +73,13 @@ import { ref } from 'vue'
 const router = useRouter()
 const quiz = ref(null)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:6500";
-const userName = ref('')
 
 /* ---------------- API FETCH ---------------- */
-const { data, pending } = await useFetch(`${API_BASE_URL}/api/quizzes`, {
-  default: () => ({
-    quizzes: [],
-    stats: { users: 0 }
-  })
+const res = await useFetch(`${API_BASE_URL}/api/quizzes`, {
+  method: "GET"
 })
-
-quiz.value = data.value?.quizzes?.length ? data.value.quizzes[0] : null
-
-/* fallback لو API مش جاهز */
-const fallback = {
-  stats: { users: 12450 },
-  quizzes: [
-    {
-      id: 'animal',
-      title: 'أي حيوان يشبهك؟',
-      description: 'اكتشف شخصيتك الحيوانية 🐯',
-      image: '/images/quiz1.jpg',
-      plays: 5230,
-      trending: true
-    },
-    {
-      id: 'leader',
-      title: 'أي قائد أنت؟',
-      description: 'هل أنت قائد بالفطرة؟',
-      image: '/images/quiz2.jpg',
-      plays: 3120,
-      trending: false
-    },
-    {
-      id: 'iq',
-      title: 'اختبار الذكاء السريع',
-      description: 'اختبر سرعة تفكيرك ⚡',
-      image: '/images/quiz3.jpg',
-      plays: 8420,
-      trending: true
-    }
-  ]
-}
-
-/* merge API مع fallback */
-const quizzes = ref(data.value.quizzes)
+// quiz.value = res.data.value?.data?.length ? res.value.data.quizzes[0] : null
+const quizzes = res.data.value.data
 
 /* ---------------- ACTIONS ---------------- */
 const goToQuiz = (quiz) => {
