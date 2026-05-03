@@ -86,10 +86,6 @@ const goToQuiz = (quiz) => {
   router.push(`/quiz/${quiz.slug}`)
 }
 
-const scrollToQuizzes = () => {
-  document.getElementById('quizzes')?.scrollIntoView({ behavior: 'smooth' })
-}
-
 /* ---------------- SEO ---------------- */
 useHead({
   title: 'اختبارات ممتعة - اكتشف نفسك',

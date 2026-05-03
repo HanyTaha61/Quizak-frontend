@@ -306,7 +306,7 @@ const getImage = (animal) => {
 }
 
 const shareResult = () => {
-  const link = 'https://www.quizak.com'
+  const link = 'https://quizak-frontend.vercel.app'
 
   const text = `🔥أنا أشبه ${result.value?.title} 😎
 شخصيتي تشبه ${result.value?.title}!
@@ -318,7 +318,7 @@ ${link}`
 }
 
 const shareOnFacebook = () => {
-  const link = `https://www.quizak.com/quiz/${route.params.slug}`
+  const link = `https://quizak-frontend.vercel.app/quiz/${route.params.slug}`
 
   const text = `🔥 أنا شخصيتي تشبه ${result.value?.title} 😎`
 

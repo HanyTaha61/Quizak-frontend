@@ -9,7 +9,7 @@
             variant="filled" 
             placeholder="مثال: أحمد علي" 
           />
-          <v-btn color="primary" class="mt-3 ml-3" @click="quizReady = true"> ابدأ الاختبار </v-btn>
+          <v-btn color="primary" :disabled="!userName.trim()" class="mt-3 ml-3" @click="quizReady = true"> ابدأ الاختبار </v-btn>
         </v-row>
         </v-container>
         <div v-if="quizReady && userName.trim() !== ''">
