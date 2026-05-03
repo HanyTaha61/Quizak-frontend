@@ -195,6 +195,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const API_BASE_URL = import.meta.env
 const quiz = ref({
   title: '',
   description: '',

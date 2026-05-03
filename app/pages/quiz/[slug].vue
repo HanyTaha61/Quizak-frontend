@@ -52,7 +52,7 @@ useHead(() => ({
 }))
 
 
-onMounted(async () => {
-  quiz.value = await $fetch(`${API_BASE_URL}/api/quizzes/${route.params.slug}`)
-})
+  onMounted(async () => {
+    quiz.value = await $fetch(`${API_BASE_URL}/api/quizzes/${route.params.slug}`)
+  })
 </script>
